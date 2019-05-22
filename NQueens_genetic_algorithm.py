@@ -2,11 +2,16 @@ import numpy
 import random
 import itertools as it  # helps to iterate over a loop in two different ranges
 
-
-MAX_EPOCH = 100
-BOARD_SIZE = 5
+# vars for n_queens
+BOARD_SIZE = 10
 EMPTY = 0
 QUEEN = 1
+
+# vars for genetic_algo
+MAX_EPOCH = 1000
+POPULATION = 20
+KILL_SIZE = 50  # in percentage
+K = int(BOARD_SIZE/2)
 
 
 class N_Qqueens:
@@ -139,6 +144,29 @@ class Genetic_Algorithm:
         fitness = float(((BOARD_SIZE-violations)*100)/BOARD_SIZE)
         return fitness
 
+class Chromosome_Collection:
+    def __init__(self):
+        # init by randomly creating some chromosomes
+        self.data = []      # contains list of items
+        self.BEST_FITNESS = 0
+        self.BEST_FIT_CHROMOSOME_INDEX = 0
+
+        self.nq = N_Qqueens()
+        self.ga = Genetic_Algorithm(self.nq)
+
+        for i in range(POPULATION):
+            item = []   # has the [chromosome, fitness]
+            chromo = self.ga.randomize_chromosome()
+            fitness = self.ga.get_fitness(chromo)
+            item.append(chromo);    item.append(fitness)
+
+            if fitness > self.BEST_FITNESS:
+                self.BEST_FITNESS = fitness
+                self.BEST_FIT_CHROMOSOME_INDEX = i
+
+            self.data.append(item)
+
+
 
 def main():
     nq = N_Qqueens()
@@ -147,6 +175,26 @@ def main():
     # testing
     chr = ga.randomize_chromosome()
     nq.print_board(chr)
+
+def test4():
+    collection = Chromosome_Collection()
+
+    nq = N_Qqueens()
+    ga = Genetic_Algorithm(nq)
+
+    for i in range(POPULATION):
+        print(collection.data[i][1])
+
+    print()
+    print("best fitness: ", collection.BEST_FITNESS)
+    print("best fit choromo index: ", collection.BEST_FIT_CHROMOSOME_INDEX)
+
+test4()
+# main()
+
+
+
+
 
 
 def test():
@@ -199,6 +247,3 @@ def test3():
             keep_running = False
 
         counter += 1
-
-test3()
-# main()
