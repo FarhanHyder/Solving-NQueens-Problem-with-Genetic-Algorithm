@@ -23,7 +23,7 @@ def update_under_attack(board, row, col):
             board[row][i] = UNDER_ATTACK
 
     # update vertical
-    for i in it.chain(range(0, row), range(row + 1, BOARD_SIZE)):
+    for i in it.chain(range(0, row)):
         board[i][col] = UNDER_ATTACK
         if board[i][col] != QUEEN:
             board[i][col] = UNDER_ATTACK
@@ -35,28 +35,12 @@ def update_under_attack(board, row, col):
     c_n = [i for i in range(col-1, -1, -1)]
     for i in range(min(len(r_n), len(c_n))):
         board[r_n[i]][c_n[i]] = UNDER_ATTACK
-    # lower-part
-        if board[r_n[i]][c_n[i]] != QUEEN:
-            board[r_n[i]][c_n[i]] = UNDER_ATTACK
-        # lower-part
-    r_n = [i for i in range(row + 1, BOARD_SIZE)]
-    c_n = [i for i in range(col + 1, BOARD_SIZE)]
-    for i in range(min(len(r_n), len(c_n))):
-        board[r_n[i]][c_n[i]] = UNDER_ATTACK
-        if board[r_n[i]][c_n[i]] != QUEEN:
-            board[r_n[i]][c_n[i]] = UNDER_ATTACK
 
     # update diagonal: right-left
     # upper-part
         # upper-part
     r_n = [i for i in range(row - 1, -1, -1)]
     c_n = [i for i in range(col + 1, BOARD_SIZE)]
-    for i in range(min(len(r_n), len(c_n))):
-        if board[r_n[i]][c_n[i]] != QUEEN:
-            board[r_n[i]][c_n[i]] = UNDER_ATTACK
-    # lower-part
-    r_n = [i for i in range(row + 1, BOARD_SIZE)]
-    c_n = [i for i in range(col - 1, -1, -1)]
     for i in range(min(len(r_n), len(c_n))):
         if board[r_n[i]][c_n[i]] != QUEEN:
             board[r_n[i]][c_n[i]] = UNDER_ATTACK
@@ -87,20 +71,9 @@ def place_queen(board, row, col):
 def main():
     board = create_board()
 
-    row = 3; col = 5
-    board[row, col] = QUEEN
-    update_under_attack(board, row, col)
-    place_queen(board,1,3)
-    place_queen(board,4,2)
+    # place_queen(board,1,3)
+    place_queen(board,6,5)
     print_board(board, show_attack=True)
-
-
-    # try counting forward
-    r_n = [i for i in range(row+1, BOARD_SIZE)]
-    c_n = [i for i in range(col+1, BOARD_SIZE)]
-
-    for i in range(min(len(r_n), len(c_n))):
-        print(r_n[i], c_n[i])
 
 
 main()
