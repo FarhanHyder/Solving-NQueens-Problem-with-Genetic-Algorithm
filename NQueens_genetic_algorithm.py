@@ -33,12 +33,13 @@ class N_Qqueens:
                     print("-", end=" ")
             print()
 
-    # post: returns true if a rule is violated for the current position, false otherwise
+    # post: returns number of violations committed in the given locations
     def check_violation(self, board, row, col):
+        violations = 0
         # check vertical: up
         for i in it.chain(range(0, row)):
             if board[i][col] == QUEEN:
-                return True
+                violations += 1
 
         # check diagonal: left-right
         # upper-part
@@ -46,7 +47,7 @@ class N_Qqueens:
         c_n = [i for i in range(col - 1, -1, -1)]
         for i in range(min(len(r_n), len(c_n))):
             if board[r_n[i]][c_n[i]] == QUEEN:
-                return True
+                violations += 1
 
         # check diagonal: right-left
         # upper-part
@@ -54,9 +55,9 @@ class N_Qqueens:
         c_n = [i for i in range(col + 1, BOARD_SIZE)]
         for i in range(min(len(r_n), len(c_n))):
             if board[r_n[i]][c_n[i]] == QUEEN:
-                return True
+                violations += 1
 
-        return False
+        return violations
 
     # returns the col index of the queen in the given row, returns -1 if queen not found
     def get_queen_col_index(self, board, row):
@@ -131,10 +132,12 @@ class Genetic_Algorithm:
             # find the queen in this row
             col = self.nq.get_queen_col_index(board, i)
             # check violations for this queen
-            if self.nq.check_violation(board, i, col):
-                violations += 1
+            violations += self.nq.check_violation(board, i, col)
 
-        return violations
+        # round fitness between 0,100
+        violations = max(0, min(violations, BOARD_SIZE)) # clip violations between 0-100
+        fitness = float(((BOARD_SIZE-violations)*100)/BOARD_SIZE)
+        return fitness
 
 
 def main():
