@@ -5,8 +5,6 @@ import itertools as it  # helps to iterate over a loop in two different ranges
 BOARD_SIZE = 10  # board will be a BOARD_SIZE*BOARD_SIZE matrix
 EMPTY = 0
 QUEEN = 1
-UNDER_ATTACK = 2  # if a position is marked UNDER_ATTACK, then it is not safe to play in that pos
-
 
 # create an empty BOARD_SIZE*BOARD_SIZE matrix
 def create_board():
@@ -45,14 +43,12 @@ def square_is_available(board, row, col):
 
 
 # print board in more user friendly way
-def print_board(board, show_attack=False):
+def print_board(board):
     for i in range(BOARD_SIZE):
         for j in range(BOARD_SIZE):
             item = board[i][j]
             if item == QUEEN:
                 print("Q", end=" ")
-            elif item == UNDER_ATTACK and show_attack:
-                print("x", end=" ")
             else:
                 print("-", end=" ")
         print()
@@ -61,7 +57,6 @@ def print_board(board, show_attack=False):
 # pre: row, col must be in range
 def place_queen(board, row, col):
     board[row][col] = QUEEN
-    update_under_attack(board,row,col)
 
 
 def main():
@@ -69,7 +64,9 @@ def main():
 
     # place_queen(board,1,3)
     place_queen(board,6,5)
-    print_board(board, show_attack=True)
+    print_board(board)
+    print(square_is_available(board,7,5))   # false
+    print(square_is_available(board,2,3))   # true
 
 
 main()
