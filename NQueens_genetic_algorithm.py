@@ -4,7 +4,7 @@ import itertools as it  # helps to iterate over a loop in two different ranges
 
 
 MAX_EPOCH = 100
-BOARD_SIZE = 10
+BOARD_SIZE = 4
 EMPTY = 0
 QUEEN = 1
 
@@ -38,6 +38,39 @@ class N_Qqueens:
         # check vertical: up
         for i in it.chain(range(0, row)):
             if board[i][col] == QUEEN:
+                return True
+
+        # check diagonal: left-right
+        # upper-part
+        r_n = [i for i in range(row - 1, -1, -1)]
+        c_n = [i for i in range(col - 1, -1, -1)]
+        for i in range(min(len(r_n), len(c_n))):
+            if board[r_n[i]][c_n[i]] == QUEEN:
+                return True
+
+        # check diagonal: right-left
+        # upper-part
+        r_n = [i for i in range(row - 1, -1, -1)]
+        c_n = [i for i in range(col + 1, BOARD_SIZE)]
+        for i in range(min(len(r_n), len(c_n))):
+            if board[r_n[i]][c_n[i]] == QUEEN:
+                return True
+
+        return False
+
+    # returns the col index of the queen in the given row, returns -1 if queen not found
+    def get_queen_col_index(self, board, row):
+        for i in range (BOARD_SIZE):
+            if board[row][i] == QUEEN:
+                return i
+        return -1
+
+
+    # remove following later
+    def is_square_available(self, board, row, col):
+        # check vertical: up
+        for i in it.chain(range(0, row)):
+            if board[i][col] == QUEEN:
                 return False
 
         # check diagonal: left-right
@@ -58,38 +91,86 @@ class N_Qqueens:
 
         return True
 
+    def is_solution_found(self, board, row=0):
+        if row >= BOARD_SIZE:
+            # means we were able to place a queen in the last row (board[BOARD_SIZE-1][some_col]), that's a success
+            return True
+
+        for i in range(0, BOARD_SIZE):
+            if self.is_square_available(board, row, i):
+                # square is available, place queen
+                self.place_queen(board, row, i)
+                # recursive call and place queen in the next row
+                # as there is constraint to placing queen in the same row
+                if self.is_solution_found(board, row + 1):
+                    return True
+
+                # placing the queen here didn't work. so remove it and backtrack to previous step.
+                self.remove_queen(board, row, i)
+
+        return False
+
 
 class Genetic_Algorithm:
-    # def __init__(self, NQ):
-    #     self.nq = NQ
+    def __init__(self, NQ):
+        self.nq = NQ
 
     def randomize_chromosome(self):
-        nq = N_Qqueens()
-        chr = nq.create_empty_board()
+        chr = self.nq.create_empty_board()
         # randomly place a queen in each row
         for i in range(BOARD_SIZE):
             col = random.randint(0,BOARD_SIZE-1)    # 0 <= col < BOARD_SIZE
-            nq.place_queen(chr, i, col)
+            self.nq.place_queen(chr, i, col)
 
         return chr
 
     # post: returns a number between 0-100
     def find_fitness(self, board):
         violations = 0
+        for i in range(BOARD_SIZE):
+            # find the queen in this row
+            col = self.nq.get_queen_col_index(board, i)
+            # check violations for this queen
+            if self.nq.check_violation(board, i, col):
+                violations += 1
 
+        return violations
 
 
 def main():
-    ga = Genetic_Algorithm()
     nq = N_Qqueens()
+    ga = Genetic_Algorithm(nq)
 
     # testing
     chr = ga.randomize_chromosome()
     nq.print_board(chr)
 
 
+def test():
+    nq = N_Qqueens()
+    ga = Genetic_Algorithm(nq)
 
+    chr = ga.randomize_chromosome()
+    nq.print_board(chr)
+    print(ga.find_fitness(chr))
 
-main()
-# for i in range(BOARD_SIZE):
-#     print(random.randint(0,BOARD_SIZE-1))
+def test2():
+    nq = N_Qqueens()
+    board = nq.create_empty_board()
+
+    if nq.is_solution_found(board):
+        nq.print_board(board)
+    else:
+        print("Solution Not Found!")
+
+    ga = Genetic_Algorithm(nq)
+    chr = ga.randomize_chromosome()
+
+    # nq.print_board(board)
+    print(ga.find_fitness(board))
+
+    nq.print_board(chr)
+    print(ga.find_fitness(chr))
+
+test2()
+# main()
