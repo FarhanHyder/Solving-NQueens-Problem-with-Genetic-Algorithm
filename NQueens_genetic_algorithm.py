@@ -4,7 +4,7 @@ import itertools as it  # helps to iterate over a loop in two different ranges
 
 
 MAX_EPOCH = 100
-BOARD_SIZE = 4
+BOARD_SIZE = 5
 EMPTY = 0
 QUEEN = 1
 
@@ -126,7 +126,7 @@ class Genetic_Algorithm:
         return chr
 
     # post: returns a number between 0-100
-    def find_fitness(self, board):
+    def get_fitness(self, board):
         violations = 0
         for i in range(BOARD_SIZE):
             # find the queen in this row
@@ -155,7 +155,7 @@ def test():
 
     chr = ga.randomize_chromosome()
     nq.print_board(chr)
-    print(ga.find_fitness(chr))
+    print(ga.get_fitness(chr))
 
 def test2():
     nq = N_Qqueens()
@@ -170,10 +170,35 @@ def test2():
     chr = ga.randomize_chromosome()
 
     # nq.print_board(board)
-    print(ga.find_fitness(board))
+    print(ga.get_fitness(board))
 
     nq.print_board(chr)
-    print(ga.find_fitness(chr))
+    print(ga.get_fitness(chr))
 
-test2()
+# test fitness
+def test3():
+    nq = N_Qqueens()
+    ga = Genetic_Algorithm(nq)
+
+    keep_running = True
+
+    counter = 1
+    while keep_running:
+
+        print("running epoch: ",counter)
+        chromo = ga.randomize_chromosome()
+        fitness = ga.get_fitness(chromo)
+
+        if fitness == 100:
+            nq.print_board(chromo)
+            print("A solution found", "        epoch=",counter)
+            keep_running = False
+
+        if counter == MAX_EPOCH:
+            print("No solution found so far!")
+            keep_running = False
+
+        counter += 1
+
+test3()
 # main()
