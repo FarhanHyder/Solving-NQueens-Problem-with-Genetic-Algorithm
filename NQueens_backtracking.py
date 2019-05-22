@@ -1,4 +1,5 @@
 import numpy
+import itertools as it  # helps to iterate over a loop in two different ranges
 
 # global vars for the board
 BOARD_SIZE = 10  # board will be a BOARD_SIZE*BOARD_SIZE matrix
@@ -13,8 +14,13 @@ def create_board():
 
 def update_under_attack(board,row,col):
     # update horizontal
-    for i,j in zip(range(0,row), range(row+1, BOARD_SIZE)):
-        board[i][j] = UNDER_ATTACK
+    for i in it.chain(range(0, col), range(col+1, BOARD_SIZE)):
+        board[row][i] = UNDER_ATTACK
+
+    # update vertical
+    for i in it.chain(range(0, row), range(row+1, BOARD_SIZE)):
+        board[i][col] = UNDER_ATTACK
+
 
     return board
 
@@ -26,7 +32,7 @@ def print_board(board, show_attack=False):
             if item == QUEEN:
                 print("Q", end=" ")
             elif item == UNDER_ATTACK and show_attack:
-                print("A", end=" ")
+                print("x", end=" ")
             else:
                 print("-", end=" ")
         print()
@@ -35,8 +41,8 @@ def print_board(board, show_attack=False):
 def main():
     board = create_board()
 
-    board[5,5] = QUEEN
-    update_under_attack(board,5,5)
+    board[4,5] = QUEEN
+    update_under_attack(board,4,5)
     print_board(board, True)
 
 main()
