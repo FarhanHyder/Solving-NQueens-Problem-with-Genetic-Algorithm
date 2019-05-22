@@ -16,11 +16,6 @@ def create_board():
 # self-note: this function should be updated with several composite funcs for a more clean look
 # supplementary func for place_queen
 def update_under_attack(board, row, col):
-    # update horizontal
-    for i in it.chain(range(0, col), range(col + 1, BOARD_SIZE)):
-        if board[row][i] != QUEEN:
-            board[row][i] = UNDER_ATTACK
-
     # update vertical
     for i in range(row + 1, BOARD_SIZE):
         if board[i][col] != QUEEN:
@@ -62,11 +57,25 @@ def place_queen(board, row, col):
     board[row][col] = QUEEN
     update_under_attack(board,row,col)
 
+# post: returns the first available col in the given row
+#      : returns -1 if no col is available
+def get_first_available_square(board, row):
+    for i in range(BOARD_SIZE):
+        if board[row][i] == EMPTY:
+            return i
+    return -1
+
+
+def solve_nq(board, row):
+    place_queen(board, row, get_first_available_square(row))
+
 
 def main():
     board = create_board()
     # place_queen(board,1,3)
     place_queen(board,4,2)
+    print(get_first_available_square(board,4))
+
     print_board(board, show_attack=True)
 
 
