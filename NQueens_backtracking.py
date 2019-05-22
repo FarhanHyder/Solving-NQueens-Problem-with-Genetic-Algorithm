@@ -13,39 +13,35 @@ def create_board():
     return numpy.zeros(shape=(BOARD_SIZE, BOARD_SIZE)).astype(int)
 
 
-# self-note: this function should be updated with several composite funcs for a more clean look
-# supplementary func for place_queen
-def update_under_attack(board, row, col):
-    # update horizontal
+# returns true is a square is not attacked by any of the previously placed queen
+def square_is_available(board, row, col):
+    # check horizontal
     for i in it.chain(range(0, col), range(col + 1, BOARD_SIZE)):
-        board[row][i] = UNDER_ATTACK
-        if board[row][i] != QUEEN:
-            board[row][i] = UNDER_ATTACK
+        if board[row][i] == QUEEN:
+            return False
 
-    # update vertical
+    # check vertical: up
     for i in it.chain(range(0, row)):
-        board[i][col] = UNDER_ATTACK
-        if board[i][col] != QUEEN:
-            board[i][col] = UNDER_ATTACK
+        if board[i][col] == QUEEN:
+            return False
 
-    # update diagonal: left-right
-    # upper-part
+    # check diagonal: left-right
         # upper-part
     r_n = [i for i in range(row-1, -1, -1)]
     c_n = [i for i in range(col-1, -1, -1)]
     for i in range(min(len(r_n), len(c_n))):
-        board[r_n[i]][c_n[i]] = UNDER_ATTACK
+        if board[r_n[i]][c_n[i]] == QUEEN:
+            return False
 
-    # update diagonal: right-left
-    # upper-part
+    # check diagonal: right-left
         # upper-part
     r_n = [i for i in range(row - 1, -1, -1)]
     c_n = [i for i in range(col + 1, BOARD_SIZE)]
     for i in range(min(len(r_n), len(c_n))):
-        if board[r_n[i]][c_n[i]] != QUEEN:
-            board[r_n[i]][c_n[i]] = UNDER_ATTACK
+        if board[r_n[i]][c_n[i]] == QUEEN:
+            return False
 
-    return board
+    return True
 
 
 # print board in more user friendly way
