@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import random
 import itertools as it  # helps to iterate over a loop in two different ranges
 
@@ -9,8 +9,8 @@ QUEEN = 1
 
 # vars for genetic_algo
 MAX_EPOCH = 1000
-POPULATION = 20
-KILL_SIZE = 50  # in percentage
+POPULATION = 10     # keep this number even
+KILL_SIZE = 50      # percentile values
 K = int(BOARD_SIZE/2)
 
 
@@ -25,7 +25,7 @@ class N_Qqueens:
 
     # create an empty BOARD_SIZE*BOARD_SIZE matrix
     def create_empty_board(self):
-        return numpy.zeros(shape=(BOARD_SIZE, BOARD_SIZE)).astype(int)
+        return np.zeros(shape=(BOARD_SIZE, BOARD_SIZE)).astype(int)
 
     # print board in more user friendly way
     def print_board(self, board):
@@ -116,7 +116,6 @@ class N_Qqueens:
 
         return False
 
-
 class Genetic_Algorithm:
     def __init__(self, NQ):
         self.nq = NQ
@@ -150,15 +149,15 @@ class Chromosome_Collection:
         self.data = []      # contains list of items
         self.BEST_FITNESS = 0
         self.BEST_FIT_CHROMOSOME_INDEX = 0
+        self.fitness_data = []
 
         self.nq = N_Qqueens()
         self.ga = Genetic_Algorithm(self.nq)
 
         for i in range(POPULATION):
-            item = []   # has the [chromosome, fitness]
-            chromo = self.ga.randomize_chromosome()
-            fitness = self.ga.get_fitness(chromo)
-            item.append(chromo);    item.append(fitness)
+            item = self.get_randomized_item()
+            fitness = item[1]
+            self.fitness_data.append(fitness)
 
             if fitness > self.BEST_FITNESS:
                 self.BEST_FITNESS = fitness
@@ -166,7 +165,40 @@ class Chromosome_Collection:
 
             self.data.append(item)
 
+    def select_fit_chromosomes(self):
+        new_data = []
+        fitness_cap = np.percentile(self.fitness_data, KILL_SIZE)
 
+        for i in range(POPULATION):
+            if self.data[i][1] > fitness_cap:
+                item = []
+                item.append(self.data[i][0])
+                item.append(self.data[i][1])
+                new_data.append(item)
+
+        parent_population = len(new_data)
+        print("parent pop:" ,parent_population)
+        # if parent_population is less than less than 2
+        #     we will need more parents for mutation
+
+
+        self.data = new_data
+
+    # post: returns an item. item => [chromosome, fitness]
+    def get_randomized_item(self):
+        item = []  # has the [chromosome, fitness]
+        chromo = self.ga.randomize_chromosome()
+        fitness = self.ga.get_fitness(chromo)
+        item.append(chromo)
+        item.append(fitness)
+
+        return item
+
+
+
+collection = Chromosome_Collection()
+nq = N_Qqueens()
+ga = Genetic_Algorithm(nq)
 
 def main():
     nq = N_Qqueens()
@@ -189,7 +221,15 @@ def test4():
     print("best fitness: ", collection.BEST_FITNESS)
     print("best fit choromo index: ", collection.BEST_FIT_CHROMOSOME_INDEX)
 
-test4()
+def test5():
+
+    collection.select_fit_chromosomes()
+
+    for i in range(len(collection.data)):
+        print(collection.data[i][1])
+
+
+test5()
 # main()
 
 
