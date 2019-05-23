@@ -1,19 +1,25 @@
+'''
+author: Farhan Hyder, Andrew Truett
+CSC 448 - Artificial Intelligence
+Program2 - The n-Queens Problem using Genetic Algorithm
+'''
 import numpy as np
 import random
 import itertools as it  # helps to iterate over a loop in two different ranges
 
 # vars for n_queens
-BOARD_SIZE = 4
+BOARD_SIZE = 5
 EMPTY = 0
 QUEEN = 1
 
 # vars for genetic_algo
 MAX_EPOCH = 100
-POPULATION = 100  # keep this number even
+START_POPULATION = 100  # keep this number even
 KILL_SIZE = 40  # percentile values
 MUTATION_PROBABILITY = 0.01  # [0.01 - 1.00]
-K = 3
+MATING_PROBABILITY = 0.1
 
+K = 5
 
 class N_Qqueens:
     # pre: row, col must be in range
@@ -72,7 +78,6 @@ class N_Qqueens:
                 return i
         return -1
 
-
 class Genetic_Algorithm_Util:
     def __init__(self, NQ):
         self.nq = NQ
@@ -104,12 +109,30 @@ class Genetic_Algorithm_Util:
     def is_odd(self, num):
         return (num % 2 == 1)
 
-    # post: returns true if it should mutate, false otherwise
-    def check_mutation(self):
+    # post: returns true if it should mutate/mate, false otherwise
+    def check_probability(self, whatFor, population):
+
+        if whatFor == "mutation":
+            num = MUTATION_PROBABILITY
+        else:
+            num = MATING_PROBABILITY
+
+        # we can't cease from existence
+        if population < START_POPULATION:
+            num *= 10    # let's boost the mating season
+
+        # can't over populate either
+        if population > (START_POPULATION*100):
+            num /= 10
+            num = max(1,num)
+
         random_n = random.randint(1, 100)
-        for i in range(int(MUTATION_PROBABILITY * 100)):
+        random_n1 = random.randint(1, 100)
+
+        num = int(num*100)
+        for i in range(num):
             r = random.randint(1, 100)
-            if r == random_n:
+            if r == random_n or r == random_n1:
                 return True
 
         return False
@@ -122,11 +145,12 @@ class Chromosome_Collection:
         self.BEST_FITNESS = 0
         self.BEST_FIT_CHROMOSOME_INDEX = 0
         self.fitness_data = []
+        self.best_fitness_change = 0
 
         self.nq = N_Qqueens()
         self.ga = Genetic_Algorithm_Util(self.nq)
 
-        for i in range(POPULATION):
+        for i in range(START_POPULATION):
             item = self.get_randomized_item()
             fitness = item[1]
             self.fitness_data.append(fitness)
@@ -142,7 +166,9 @@ class Chromosome_Collection:
         new_best_fit_chromo_idx = 0
         new_fitness_data = []
 
-        for i in range(POPULATION):
+        population = len(new_data)
+
+        for i in range(population):
             fitness = new_data[i][1]
             new_fitness_data.append(fitness)
 
@@ -150,6 +176,7 @@ class Chromosome_Collection:
                 new_best_fitness = fitness
                 new_best_fit_chromo_idx = i
 
+        self.best_fitness_change = new_best_fitness - self.BEST_FITNESS
         self.data = new_data
         self.BEST_FITNESS = new_best_fitness
         self.BEST_FIT_CHROMOSOME_INDEX = new_best_fit_chromo_idx
@@ -158,25 +185,24 @@ class Chromosome_Collection:
     def select_fit_chromosomes(self):
         new_data = []
         fitness_cap = np.percentile(self.fitness_data, KILL_SIZE)
-        print("fitness cap", fitness_cap)
-        print("fitness data", self.fitness_data)
 
+        population = len(self.data)
 
-        for i in range(POPULATION):
+        for i in range(population):
             fitness = self.data[i][1]
             if fitness > fitness_cap:
                 item = []
                 chromo = self.data[i][0]
-                item.append(chromo);
+                item.append(chromo)
                 item.append(fitness)
 
                 new_data.append(item)
 
         parent_population = len(new_data)
-        parents_required = POPULATION - parent_population - KILL_SIZE
+        parents_required = population - parent_population - KILL_SIZE
 
         if parents_required > 0:
-            for i in range(POPULATION):
+            for i in range(population):
                 item = []
                 fitness = self.data[i][1]
                 chromo = self.data[i][0]
@@ -193,8 +219,10 @@ class Chromosome_Collection:
         return new_data
 
     def data_info(self, s):
-        print(s, end="\t\t\t")
-        print("best fitness:", self.BEST_FITNESS)
+        print(s)
+        # print(s, end="\t\t\t")
+        # print("best fitness:", self.BEST_FITNESS,end="\t\t")
+        # print("pop: ", len(self.data))
 
     # post: returns two offspring chromosome items
     def crossover(self, parent1, parent2):
@@ -231,8 +259,9 @@ class Chromosome_Collection:
         return i1, i2
 
     def mutate(self, new_data):
-        for i in range(POPULATION):
-            if ga.check_mutation():
+        population = len(new_data)
+        for i in range(population):
+            if self.ga.check_probability("mutation", population):
                 row1, row2 = self.get_two_randomized_indices(BOARD_SIZE)
                 # mutate by exchanging queen position
                 temp = new_data[i][0][row1]
@@ -251,7 +280,7 @@ class Chromosome_Collection:
 
         return index1, index2
 
-    # post: returns an item. item => [chromosome, fitness]
+    # post: returns an item. item => [chromosome, fitness, mating_prob]
     def get_randomized_item(self):
         item = []  # has the [chromosome, fitness]
         chromo = self.ga.randomize_chromosome()
@@ -261,30 +290,34 @@ class Chromosome_Collection:
 
         return item
 
-    def epoch(self):
-
-        selected_chromosomes = self.select_fit_chromosomes()
-        offspring_needed = POPULATION - len(selected_chromosomes)
+    def mating_season(self, selected_parents):
+        population = len(selected_parents)
         offsprings = []
+        for i in range(population):
+            if (self.ga.check_probability("mating", population)):
+                p1_idx, p2_idx = self.get_two_randomized_indices(len(selected_parents))
+                p1_idx = i
+                parent1 = selected_parents[p1_idx][0]
+                parent2 = selected_parents[p2_idx][0]
+                child1, child2 = self.crossover(parent1, parent2)
 
-        print("number of selected chromo: ", len(selected_chromosomes))
-        print("number of offspring needed: ", offspring_needed)
+                offsprings.append(child1)
+                offsprings.append(child2)
 
-        counter = 0
-        while (counter < offspring_needed):
-            p1_idx, p2_idx = self.get_two_randomized_indices(len(selected_chromosomes))
-            parent1 = selected_chromosomes[p1_idx][0]
-            parent2 = selected_chromosomes[p2_idx][0]
-            child1, child2 = self.crossover(parent1, parent2)
+        return offsprings
 
-            offsprings.append(child1)
-            offsprings.append(child2)
 
-            counter += 2
+
+    def epoch(self):
+        population = len(self.data)
+        selected_chromosomes = self.select_fit_chromosomes()
+
+        offspring_needed = population - len(selected_chromosomes)
+        offsprings = self.mating_season(selected_chromosomes)
 
         new_data = []
 
-        if ga.is_odd(offspring_needed):
+        if self.ga.is_odd(offspring_needed):
             new_data = selected_chromosomes + offsprings[:len(offsprings) - 1]
         else:
             new_data = selected_chromosomes + offsprings
@@ -293,12 +326,15 @@ class Chromosome_Collection:
         self.update_new_data_info(new_data)
 
     def run(self):
+        nq = N_Qqueens()
         counter = 0
         while True:
             self.data_info("epoch [" + str(counter) + "]")
             self.epoch()
             if self.BEST_FITNESS == 100:
                 print("Solution found!")
+                print("solution: ")
+                nq.print_board(self.data[self.BEST_FIT_CHROMOSOME_INDEX][0])
                 break
             if counter == MAX_EPOCH:
                 print("Solution not found!")
@@ -306,42 +342,7 @@ class Chromosome_Collection:
 
             counter += 1
 
-
-collection = Chromosome_Collection()
-nq = N_Qqueens()
-ga = Genetic_Algorithm_Util(nq)
-
-
 def main():
-    nq = N_Qqueens()
-    ga = Genetic_Algorithm_Util(nq)
     collection = Chromosome_Collection()
-
-    # testing
-    collection.sort_by_fitness()
-
-
-def test_run():
     collection.run()
-test_run()
-
-def test_epoch():
-    for i in range(20):
-        print(i)
-        collection.epoch()
-# test_epoch()
-
-
-def test_check_mutation():
-    for i in range(100):
-        if ga.check_mutation():
-            print("M")
-# test_check_mutation()
-
-def test_cross():
-    selected = collection.select_fit_chromosomes()
-    c1, c2 = collection.crossover(selected[0][0], selected[1][0])
-
-    print("child1 fitness: ", c1[1])
-    print("child2 fitness: ", c2[1])
-# test_cross()
+main()
