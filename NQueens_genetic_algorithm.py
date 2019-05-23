@@ -11,7 +11,7 @@ QUEEN = 1
 MAX_EPOCH = 100
 POPULATION = 100  # keep this number even
 KILL_SIZE = 40  # percentile values
-MUTATION_PROBABILITY = 0.05
+MUTATION_PROBABILITY = 0.05   # [0.01 - 1.00]
 K = 4
 
 
@@ -148,38 +148,15 @@ class Genetic_Algorithm_Util:
     def is_odd(self, num):
         return (num%2 == 1)
 
-    # def quicksort(self,myList, start, end):
-    #     if start < end:
-    #         # partition the list
-    #         pivot = self.partition(myList, start, end)
-    #         # sort both halves
-    #         self.quicksort(myList, start, pivot - 1)
-    #         self.quicksort(myList, pivot + 1, end)
-    #     return myList
-    #
-    # def partition(self,myList, start, end):
-    #     pivot = myList[start]
-    #     left = start + 1
-    #     right = end
-    #     done = False
-    #     while not done:
-    #         while left <= right and myList[left] <= pivot:
-    #             left = left + 1
-    #         while myList[right] >= pivot and right >= left:
-    #             right = right - 1
-    #         if right < left:
-    #             done = True
-    #         else:
-    #             # swap places
-    #             temp = myList[left]
-    #             myList[left] = myList[right]
-    #             myList[right] = temp
-    #     # swap start with myList[right]
-    #     temp = myList[start]
-    #     myList[start] = myList[right]
-    #     myList[right] = temp
-    #     return right
+    # post: returns true if it should mutate, false otherwise
+    def check_mutation(self):
+        random_n = random.randint(1,100)
+        for i in range(int(MUTATION_PROBABILITY*100)):
+            r = random.randint(1,100)
+            if r==random_n:
+                return True
 
+        return False
 
 class Chromosome_Collection:
     def __init__(self):
@@ -220,7 +197,6 @@ class Chromosome_Collection:
         self.BEST_FITNESS = new_best_fitness
         self.BEST_FIT_CHROMOSOME_INDEX = new_best_fit_chromo_idx
         self.fitness_data = new_fitness_data
-
 
     def select_fit_chromosomes(self):
         new_data = []
@@ -291,6 +267,10 @@ class Chromosome_Collection:
         i2.append(self.ga.get_fitness(child2))
 
         return i1, i2
+
+    def mutate(self, new_data):
+        pass
+
 
     # post: returns index number of two parents
     def select_parents(self, parent_list_size):
@@ -391,9 +371,14 @@ def test_epoch():
         print(i)
         collection.epoch()
 
-test_epoch()
+# test_epoch()
 
 
+def test_check_mutation():
+    for i in range(100):
+        if ga.check_mutation():
+            print("M")
+test_check_mutation()
 
 def test_cross():
     selected = collection.select_fit_chromosomes()
