@@ -8,9 +8,9 @@ EMPTY = 0
 QUEEN = 1
 
 # vars for genetic_algo
-MAX_EPOCH = 1000
+MAX_EPOCH = 100
 POPULATION = 100  # keep this number even
-KILL_SIZE = 30  # percentile values
+KILL_SIZE = 40  # percentile values
 K = 4
 
 
@@ -312,7 +312,7 @@ class Chromosome_Collection:
         counter = 0
         while True:
             self.data_info("epoch ["+str(counter)+"]")
-
+            self.epoch()
             if self.BEST_FITNESS == 100:
                 print("Solution found!")
                 break
