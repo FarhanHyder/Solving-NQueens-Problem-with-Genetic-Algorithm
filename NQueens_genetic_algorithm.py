@@ -3,7 +3,7 @@ import random
 import itertools as it  # helps to iterate over a loop in two different ranges
 
 # vars for n_queens
-BOARD_SIZE = 10
+BOARD_SIZE = 4
 EMPTY = 0
 QUEEN = 1
 
@@ -11,8 +11,8 @@ QUEEN = 1
 MAX_EPOCH = 100
 POPULATION = 100  # keep this number even
 KILL_SIZE = 40  # percentile values
-MUTATION_PROBABILITY = 0.05   # [0.01 - 1.00]
-K = 4
+MUTATION_PROBABILITY = 0.01  # [0.01 - 1.00]
+K = 3
 
 
 class N_Qqueens:
@@ -72,50 +72,6 @@ class N_Qqueens:
                 return i
         return -1
 
-    # remove following later
-    def is_square_available(self, board, row, col):
-        # check vertical: up
-        for i in it.chain(range(0, row)):
-            if board[i][col] == QUEEN:
-                return False
-
-        # check diagonal: left-right
-        # upper-part
-        r_n = [i for i in range(row - 1, -1, -1)]
-        c_n = [i for i in range(col - 1, -1, -1)]
-        for i in range(min(len(r_n), len(c_n))):
-            if board[r_n[i]][c_n[i]] == QUEEN:
-                return False
-
-        # check diagonal: right-left
-        # upper-part
-        r_n = [i for i in range(row - 1, -1, -1)]
-        c_n = [i for i in range(col + 1, BOARD_SIZE)]
-        for i in range(min(len(r_n), len(c_n))):
-            if board[r_n[i]][c_n[i]] == QUEEN:
-                return False
-
-        return True
-
-    def is_solution_found(self, board, row=0):
-        if row >= BOARD_SIZE:
-            # means we were able to place a queen in the last row (board[BOARD_SIZE-1][some_col]), that's a success
-            return True
-
-        for i in range(0, BOARD_SIZE):
-            if self.is_square_available(board, row, i):
-                # square is available, place queen
-                self.place_queen(board, row, i)
-                # recursive call and place queen in the next row
-                # as there is constraint to placing queen in the same row
-                if self.is_solution_found(board, row + 1):
-                    return True
-
-                # placing the queen here didn't work. so remove it and backtrack to previous step.
-                self.remove_queen(board, row, i)
-
-        return False
-
 
 class Genetic_Algorithm_Util:
     def __init__(self, NQ):
@@ -146,17 +102,18 @@ class Genetic_Algorithm_Util:
 
     # post: returns if a number is odd
     def is_odd(self, num):
-        return (num%2 == 1)
+        return (num % 2 == 1)
 
     # post: returns true if it should mutate, false otherwise
     def check_mutation(self):
-        random_n = random.randint(1,100)
-        for i in range(int(MUTATION_PROBABILITY*100)):
-            r = random.randint(1,100)
-            if r==random_n:
+        random_n = random.randint(1, 100)
+        for i in range(int(MUTATION_PROBABILITY * 100)):
+            r = random.randint(1, 100)
+            if r == random_n:
                 return True
 
         return False
+
 
 class Chromosome_Collection:
     def __init__(self):
@@ -204,36 +161,40 @@ class Chromosome_Collection:
         print("fitness cap", fitness_cap)
         print("fitness data", self.fitness_data)
 
+
         for i in range(POPULATION):
-            if self.data[i][1] > fitness_cap:
+            fitness = self.data[i][1]
+            if fitness > fitness_cap:
                 item = []
                 chromo = self.data[i][0]
-                fitness = self.data[i][1]
-                item.append(chromo);    item.append(fitness)
+                item.append(chromo);
+                item.append(fitness)
 
                 new_data.append(item)
 
         parent_population = len(new_data)
-        # if parent_population is less than less than 2
-        #     we will need one more parent to do mutation
-        #     if we have less than 2 parents, then there is huge possibility
-        #     that already existing parents have very low fitness, therefore
-        #     no need to take those. randomly generate a new chromosome, that will
-        #     have the possibility to have a higher fitness
-        if parent_population <= 2:
-            item = self.get_randomized_item()
-            while True:
-                if item[1] > fitness_cap:
+        parents_required = POPULATION - parent_population - KILL_SIZE
+
+        if parents_required > 0:
+            for i in range(POPULATION):
+                item = []
+                fitness = self.data[i][1]
+                chromo = self.data[i][0]
+                item.append(chromo);
+                item.append(fitness)
+
+                new_data.append(item)
+
+                parents_required -= 1
+                if parents_required == 0:
                     break
-                item = self.get_randomized_item()
-            new_data.append(item)
+
 
         return new_data
 
     def data_info(self, s):
-        print(s,end="\t\t\t")
-        print("best fitness:",self.BEST_FITNESS)
-
+        print(s, end="\t\t\t")
+        print("best fitness:", self.BEST_FITNESS)
 
     # post: returns two offspring chromosome items
     def crossover(self, parent1, parent2):
@@ -241,7 +202,7 @@ class Chromosome_Collection:
         child2 = self.nq.create_empty_board()
 
         # child1 crossover
-            # from parent 1
+        # from parent 1
         for i in range(0, K):
             for j in range(BOARD_SIZE):
                 child1[i][j] = parent1[i][j]
@@ -260,7 +221,8 @@ class Chromosome_Collection:
             for j in range(BOARD_SIZE):
                 child2[i][j] = parent1[i][j]
 
-        i1 = []; i2 = []
+        i1 = [];
+        i2 = []
         i1.append(child1)
         i1.append(self.ga.get_fitness(child1))
         i2.append(child2)
@@ -269,20 +231,25 @@ class Chromosome_Collection:
         return i1, i2
 
     def mutate(self, new_data):
-        pass
+        for i in range(POPULATION):
+            if ga.check_mutation():
+                row1, row2 = self.get_two_randomized_indices(BOARD_SIZE)
+                # mutate by exchanging queen position
+                temp = new_data[i][0][row1]
+                new_data[i][0][row1] = new_data[i][0][row2]
+                new_data[i][0][row2] = temp
 
-
-    # post: returns index number of two parents
-    def select_parents(self, parent_list_size):
+    # post: returns two randomized indices between [0, size]
+    def get_two_randomized_indices(self, list_size):
         # randomly select two parents
-        parent1 = random.randint(0,parent_list_size-1)
-        parent2 = -1
+        index1 = random.randint(0, list_size - 1)
+        index2 = -1
         while True:
-            parent2 = random.randint(0,parent_list_size-1)
-            if parent2 != parent1:
+            index2 = random.randint(0, list_size - 1)
+            if index2 != index1:
                 break
 
-        return parent1, parent2
+        return index1, index2
 
     # post: returns an item. item => [chromosome, fitness]
     def get_randomized_item(self):
@@ -296,20 +263,19 @@ class Chromosome_Collection:
 
     def epoch(self):
 
-        selected_chromosomes  = self.select_fit_chromosomes()
+        selected_chromosomes = self.select_fit_chromosomes()
         offspring_needed = POPULATION - len(selected_chromosomes)
         offsprings = []
 
-        print("number of selected chromo: ",len(selected_chromosomes))
+        print("number of selected chromo: ", len(selected_chromosomes))
         print("number of offspring needed: ", offspring_needed)
-
 
         counter = 0
         while (counter < offspring_needed):
-            p1_idx, p2_idx = self.select_parents(len(selected_chromosomes))
+            p1_idx, p2_idx = self.get_two_randomized_indices(len(selected_chromosomes))
             parent1 = selected_chromosomes[p1_idx][0]
             parent2 = selected_chromosomes[p2_idx][0]
-            child1, child2 = self.crossover(parent1,parent2)
+            child1, child2 = self.crossover(parent1, parent2)
 
             offsprings.append(child1)
             offsprings.append(child2)
@@ -319,16 +285,17 @@ class Chromosome_Collection:
         new_data = []
 
         if ga.is_odd(offspring_needed):
-            new_data = selected_chromosomes+offsprings[:len(offsprings)-1]
+            new_data = selected_chromosomes + offsprings[:len(offsprings) - 1]
         else:
             new_data = selected_chromosomes + offsprings
 
+        self.mutate(new_data)
         self.update_new_data_info(new_data)
 
     def run(self):
         counter = 0
         while True:
-            self.data_info("epoch ["+str(counter)+"]")
+            self.data_info("epoch [" + str(counter) + "]")
             self.epoch()
             if self.BEST_FITNESS == 100:
                 print("Solution found!")
@@ -338,13 +305,6 @@ class Chromosome_Collection:
                 break
 
             counter += 1
-
-
-
-
-
-
-
 
 
 collection = Chromosome_Collection()
@@ -363,14 +323,12 @@ def main():
 
 def test_run():
     collection.run()
-
-# test_run()
+test_run()
 
 def test_epoch():
     for i in range(20):
         print(i)
         collection.epoch()
-
 # test_epoch()
 
 
@@ -378,13 +336,12 @@ def test_check_mutation():
     for i in range(100):
         if ga.check_mutation():
             print("M")
-test_check_mutation()
+# test_check_mutation()
 
 def test_cross():
     selected = collection.select_fit_chromosomes()
     c1, c2 = collection.crossover(selected[0][0], selected[1][0])
 
-    print("child1 fitness: ",c1[1])
-    print("child2 fitness: ",c2[1])
-
+    print("child1 fitness: ", c1[1])
+    print("child2 fitness: ", c2[1])
 # test_cross()
