@@ -166,7 +166,6 @@ class Chromosome_Collection:
 
             self.data.append(item)
 
-
     def select_fit_chromosomes(self):
         new_data = []
         fitness_cap = np.percentile(self.fitness_data, KILL_SIZE)
@@ -181,7 +180,6 @@ class Chromosome_Collection:
                 new_data.append(item)
 
         parent_population = len(new_data)
-        print("parent pop:", parent_population)
         # if parent_population is less than less than 2
         #     we will need one more parent to do mutation
         #     if we have less than 2 parents, then there is huge possibility
@@ -198,7 +196,7 @@ class Chromosome_Collection:
 
         return new_data
 
-    # post: returns two offspring chromosomes
+    # post: returns two offspring chromosome items
     def crossover(self, parent1, parent2):
         child1 = self.nq.create_empty_board()
         child2 = self.nq.create_empty_board()
@@ -223,10 +221,25 @@ class Chromosome_Collection:
             for j in range(BOARD_SIZE):
                 child2[i][j] = parent1[i][j]
 
+        i1 = []; i2 = []
+        i1.append(child1)
+        i1.append(self.ga.get_fitness(child1))
+        i2.append(child2)
+        i2.append(self.ga.get_fitness(child2))
 
-        return child1, child2
+        return i1, i2
 
+    # post: returns index number of two parents
+    def select_parents(self, parent_list_size):
+        # randomly select two parents
+        parent1 = random.randint(0,parent_list_size-1)
+        parent2 = -1
+        while True:
+            parent2 = random.randint(0,parent_list_size-1)
+            if parent2 != parent1:
+                break
 
+        return parent1, parent2
 
     # post: returns an item. item => [chromosome, fitness]
     def get_randomized_item(self):
@@ -237,6 +250,17 @@ class Chromosome_Collection:
         item.append(fitness)
 
         return item
+
+    def epoch(self):
+
+        selected_chromosomes  = self.selected_chromosomes()
+        offspring_needed = POPULATION - len(selected_chromosomes)
+        print(offspring_needed)
+        offsprings = []
+
+        p1_idx, p2_idx = self.select_parents(len(selected_chromosomes))
+
+
 
 
 collection = Chromosome_Collection()
@@ -250,5 +274,22 @@ def main():
     collection = Chromosome_Collection()
 
     # testing
-    chr = ga.randomize_chromosome()
-    nq.print_board(chr)
+    collection.sort_by_fitness()
+
+# main()
+#
+# for i in range(20):
+#     print(collection.select_parents(5))
+
+def test_epoch():
+    pass
+
+def test_cross():
+    selected = collection.select_fit_chromosomes()
+    c1, c2 = collection.crossover(selected[0][0], selected[1][0])
+
+    print("child1 fitness: ",c1[1])
+    print("child2 fitness: ",c2[1])
+
+
+test_cross()
