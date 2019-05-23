@@ -9,9 +9,9 @@ QUEEN = 1
 
 # vars for genetic_algo
 MAX_EPOCH = 1000
-POPULATION = 10     # keep this number even
-KILL_SIZE = 50      # percentile values
-K = int(BOARD_SIZE/2)
+POPULATION = 100  # keep this number even
+KILL_SIZE = 30  # percentile values
+K = 4
 
 
 class N_Qqueens:
@@ -66,11 +66,10 @@ class N_Qqueens:
 
     # returns the col index of the queen in the given row, returns -1 if queen not found
     def get_queen_col_index(self, board, row):
-        for i in range (BOARD_SIZE):
+        for i in range(BOARD_SIZE):
             if board[row][i] == QUEEN:
                 return i
         return -1
-
 
     # remove following later
     def is_square_available(self, board, row, col):
@@ -116,6 +115,7 @@ class N_Qqueens:
 
         return False
 
+
 class Genetic_Algorithm:
     def __init__(self, NQ):
         self.nq = NQ
@@ -124,7 +124,7 @@ class Genetic_Algorithm:
         chr = self.nq.create_empty_board()
         # randomly place a queen in each row
         for i in range(BOARD_SIZE):
-            col = random.randint(0,BOARD_SIZE-1)    # 0 <= col < BOARD_SIZE
+            col = random.randint(0, BOARD_SIZE - 1)  # 0 <= col < BOARD_SIZE
             self.nq.place_queen(chr, i, col)
 
         return chr
@@ -139,14 +139,15 @@ class Genetic_Algorithm:
             violations += self.nq.check_violation(board, i, col)
 
         # round fitness between 0,100
-        violations = max(0, min(violations, BOARD_SIZE)) # clip violations between 0-100
-        fitness = float(((BOARD_SIZE-violations)*100)/BOARD_SIZE)
+        violations = max(0, min(violations, BOARD_SIZE))  # clip violations between 0-100
+        fitness = float(((BOARD_SIZE - violations) * 100) / BOARD_SIZE)
         return fitness
+
 
 class Chromosome_Collection:
     def __init__(self):
         # init by randomly creating some chromosomes
-        self.data = []      # contains list of items
+        self.data = []  # contains list of items
         self.BEST_FITNESS = 0
         self.BEST_FIT_CHROMOSOME_INDEX = 0
         self.fitness_data = []
@@ -165,6 +166,7 @@ class Chromosome_Collection:
 
             self.data.append(item)
 
+
     def select_fit_chromosomes(self):
         new_data = []
         fitness_cap = np.percentile(self.fitness_data, KILL_SIZE)
@@ -172,17 +174,59 @@ class Chromosome_Collection:
         for i in range(POPULATION):
             if self.data[i][1] > fitness_cap:
                 item = []
-                item.append(self.data[i][0])
-                item.append(self.data[i][1])
+                chromo = self.data[i][0]
+                fitness = self.data[i][1]
+                item.append(chromo);    item.append(fitness)
+
                 new_data.append(item)
 
         parent_population = len(new_data)
-        print("parent pop:" ,parent_population)
+        print("parent pop:", parent_population)
         # if parent_population is less than less than 2
-        #     we will need more parents for mutation
+        #     we will need one more parent to do mutation
+        #     if we have less than 2 parents, then there is huge possibility
+        #     that already existing parents have very low fitness, therefore
+        #     no need to take those. randomly generate a new chromosome, that will
+        #     have the possibility to have a higher fitness
+        if parent_population <= 2:
+            item = self.get_randomized_item()
+            while True:
+                if item[1] > fitness_cap:
+                    break
+                item = self.get_randomized_item()
+            new_data.append(item)
+
+        return new_data
+
+    # post: returns two offspring chromosomes
+    def crossover(self, parent1, parent2):
+        child1 = self.nq.create_empty_board()
+        child2 = self.nq.create_empty_board()
+
+        # child1 crossover
+            # from parent 1
+        for i in range(0, K):
+            for j in range(BOARD_SIZE):
+                child1[i][j] = parent1[i][j]
+            # from parent 2
+        for i in range(K, BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                child1[i][j] = parent2[i][j]
+
+        # child2 crossover
+        # from parent 2
+        for i in range(0, K):
+            for j in range(BOARD_SIZE):
+                child2[i][j] = parent2[i][j]
+            # from parent 1
+        for i in range(K, BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                child2[i][j] = parent1[i][j]
 
 
-        self.data = new_data
+        return child1, child2
+
+
 
     # post: returns an item. item => [chromosome, fitness]
     def get_randomized_item(self):
@@ -195,46 +239,40 @@ class Chromosome_Collection:
         return item
 
 
-
 collection = Chromosome_Collection()
 nq = N_Qqueens()
 ga = Genetic_Algorithm(nq)
 
+
 def main():
     nq = N_Qqueens()
     ga = Genetic_Algorithm(nq)
+    collection = Chromosome_Collection()
 
     # testing
     chr = ga.randomize_chromosome()
     nq.print_board(chr)
 
-def test4():
-    collection = Chromosome_Collection()
+# crossover
+def test6():
+    selected = collection.select_fit_chromosomes()
 
-    nq = N_Qqueens()
-    ga = Genetic_Algorithm(nq)
-
-    for i in range(POPULATION):
-        print(collection.data[i][1])
-
-    print()
-    print("best fitness: ", collection.BEST_FITNESS)
-    print("best fit choromo index: ", collection.BEST_FIT_CHROMOSOME_INDEX)
-
-def test5():
-
-    collection.select_fit_chromosomes()
-
-    for i in range(len(collection.data)):
-        print(collection.data[i][1])
+    for i in range(len(selected)):
+        print(selected[i][1])
 
 
-test5()
+    child1, child2 = collection.crossover(selected[0][0], selected[1][0])
+    print("child fitness: ",   ga.get_fitness(child1))
+    print("child fitness: ",   ga.get_fitness(child2))
+
+
+
+
+
+test6()
+
+
 # main()
-
-
-
-
 
 
 def test():
@@ -244,6 +282,7 @@ def test():
     chr = ga.randomize_chromosome()
     nq.print_board(chr)
     print(ga.get_fitness(chr))
+
 
 def test2():
     nq = N_Qqueens()
@@ -263,6 +302,7 @@ def test2():
     nq.print_board(chr)
     print(ga.get_fitness(chr))
 
+
 # test fitness
 def test3():
     nq = N_Qqueens()
@@ -273,13 +313,13 @@ def test3():
     counter = 1
     while keep_running:
 
-        print("running epoch: ",counter)
+        print("running epoch: ", counter)
         chromo = ga.randomize_chromosome()
         fitness = ga.get_fitness(chromo)
 
         if fitness == 100:
             nq.print_board(chromo)
-            print("A solution found", "        epoch=",counter)
+            print("A solution found", "        epoch=", counter)
             keep_running = False
 
         if counter == MAX_EPOCH:
@@ -287,3 +327,25 @@ def test3():
             keep_running = False
 
         counter += 1
+
+
+def test4():
+    collection = Chromosome_Collection()
+
+    nq = N_Qqueens()
+    ga = Genetic_Algorithm(nq)
+
+    for i in range(POPULATION):
+        print(collection.data[i][1])
+
+    print()
+    print("best fitness: ", collection.BEST_FITNESS)
+    print("best fit choromo index: ", collection.BEST_FIT_CHROMOSOME_INDEX)
+
+
+def test5():
+    collection.select_fit_chromosomes()
+
+    for i in range(len(collection.data)):
+        print(collection.data[i][1])
+
