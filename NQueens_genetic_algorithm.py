@@ -116,7 +116,7 @@ class N_Qqueens:
         return False
 
 
-class Genetic_Algorithm:
+class Genetic_Algorithm_Util:
     def __init__(self, NQ):
         self.nq = NQ
 
@@ -143,6 +143,12 @@ class Genetic_Algorithm:
         fitness = float(((BOARD_SIZE - violations) * 100) / BOARD_SIZE)
         return fitness
 
+    # post: returns if a number is odd
+    def is_odd(self, num):
+        return (num%2 == 1)
+
+
+
 
 class Chromosome_Collection:
     def __init__(self):
@@ -153,7 +159,7 @@ class Chromosome_Collection:
         self.fitness_data = []
 
         self.nq = N_Qqueens()
-        self.ga = Genetic_Algorithm(self.nq)
+        self.ga = Genetic_Algorithm_Util(self.nq)
 
         for i in range(POPULATION):
             item = self.get_randomized_item()
@@ -165,6 +171,25 @@ class Chromosome_Collection:
                 self.BEST_FIT_CHROMOSOME_INDEX = i
 
             self.data.append(item)
+
+    def update_new_data_info(self, new_data):
+        new_best_fitness = 0
+        new_best_fit_chromo_idx = 0
+        new_fitness_data = []
+
+        for i in range(POPULATION):
+            fitness = new_data[i][1]
+            new_fitness_data.append(fitness)
+
+            if fitness > new_best_fitness:
+                new_best_fitness = fitness
+                new_best_fit_chromo_idx = i
+
+        self.data = new_data
+        self.BEST_FITNESS = new_best_fitness
+        self.BEST_FIT_CHROMOSOME_INDEX = new_best_fit_chromo_idx
+        self.fitness_data = new_fitness_data
+
 
     def select_fit_chromosomes(self):
         new_data = []
@@ -195,6 +220,11 @@ class Chromosome_Collection:
             new_data.append(item)
 
         return new_data
+
+    def data_info(self, s):
+        print(s,end="\t\t\t")
+        print("best fitness:",self.BEST_FITNESS)
+
 
     # post: returns two offspring chromosome items
     def crossover(self, parent1, parent2):
@@ -257,37 +287,75 @@ class Chromosome_Collection:
         offspring_needed = POPULATION - len(selected_chromosomes)
         offsprings = []
 
-        print("Selected :",len(selected_chromosomes))
-        print("off needed :",offspring_needed)
+        counter = 0
+        while (counter < offspring_needed):
+            p1_idx, p2_idx = self.select_parents(len(selected_chromosomes))
+            parent1 = selected_chromosomes[p1_idx][0]
+            parent2 = selected_chromosomes[p2_idx][0]
+            child1, child2 = self.crossover(parent1,parent2)
+
+            offsprings.append(child1)
+            offsprings.append(child2)
+
+            counter += 2
+
+        new_data = []
+
+        if ga.is_odd(offspring_needed):
+            new_data = selected_chromosomes+offsprings[:len(offsprings)-1]
+        else:
+            new_data = selected_chromosomes + offsprings
+
+        self.update_new_data_info(new_data)
+
+    def run(self):
+        counter = 0
+        while True:
+            self.data_info("epoch ["+str(counter)+"]")
+
+            if self.BEST_FITNESS == 100:
+                print("Solution found!")
+                break
+            if counter == MAX_EPOCH:
+                print("Solution not found!")
+                break
+
+            counter += 1
 
 
-        p1_idx, p2_idx = self.select_parents(len(selected_chromosomes))
+
+
+
 
 
 
 
 collection = Chromosome_Collection()
 nq = N_Qqueens()
-ga = Genetic_Algorithm(nq)
+ga = Genetic_Algorithm_Util(nq)
 
 
 def main():
     nq = N_Qqueens()
-    ga = Genetic_Algorithm(nq)
+    ga = Genetic_Algorithm_Util(nq)
     collection = Chromosome_Collection()
 
     # testing
     collection.sort_by_fitness()
 
-# main()
-#
-# for i in range(20):
-#     print(collection.select_parents(5))
+
+def test_run():
+    collection.run()
+
+test_run()
 
 def test_epoch():
+    collection.data_info()
     collection.epoch()
+    print()
+    collection.data_info()
 
-test_epoch()
+# test_epoch()
 
 
 
