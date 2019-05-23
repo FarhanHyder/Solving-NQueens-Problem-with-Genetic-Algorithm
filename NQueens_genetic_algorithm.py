@@ -11,6 +11,7 @@ QUEEN = 1
 MAX_EPOCH = 100
 POPULATION = 100  # keep this number even
 KILL_SIZE = 40  # percentile values
+MUTATION_PROBABILITY = 0.05
 K = 4
 
 
@@ -147,7 +148,37 @@ class Genetic_Algorithm_Util:
     def is_odd(self, num):
         return (num%2 == 1)
 
-
+    # def quicksort(self,myList, start, end):
+    #     if start < end:
+    #         # partition the list
+    #         pivot = self.partition(myList, start, end)
+    #         # sort both halves
+    #         self.quicksort(myList, start, pivot - 1)
+    #         self.quicksort(myList, pivot + 1, end)
+    #     return myList
+    #
+    # def partition(self,myList, start, end):
+    #     pivot = myList[start]
+    #     left = start + 1
+    #     right = end
+    #     done = False
+    #     while not done:
+    #         while left <= right and myList[left] <= pivot:
+    #             left = left + 1
+    #         while myList[right] >= pivot and right >= left:
+    #             right = right - 1
+    #         if right < left:
+    #             done = True
+    #         else:
+    #             # swap places
+    #             temp = myList[left]
+    #             myList[left] = myList[right]
+    #             myList[right] = temp
+    #     # swap start with myList[right]
+    #     temp = myList[start]
+    #     myList[start] = myList[right]
+    #     myList[right] = temp
+    #     return right
 
 
 class Chromosome_Collection:
@@ -194,6 +225,8 @@ class Chromosome_Collection:
     def select_fit_chromosomes(self):
         new_data = []
         fitness_cap = np.percentile(self.fitness_data, KILL_SIZE)
+        print("fitness cap", fitness_cap)
+        print("fitness data", self.fitness_data)
 
         for i in range(POPULATION):
             if self.data[i][1] > fitness_cap:
@@ -287,6 +320,10 @@ class Chromosome_Collection:
         offspring_needed = POPULATION - len(selected_chromosomes)
         offsprings = []
 
+        print("number of selected chromo: ",len(selected_chromosomes))
+        print("number of offspring needed: ", offspring_needed)
+
+
         counter = 0
         while (counter < offspring_needed):
             p1_idx, p2_idx = self.select_parents(len(selected_chromosomes))
@@ -347,15 +384,14 @@ def main():
 def test_run():
     collection.run()
 
-test_run()
+# test_run()
 
 def test_epoch():
-    collection.data_info()
-    collection.epoch()
-    print()
-    collection.data_info()
+    for i in range(20):
+        print(i)
+        collection.epoch()
 
-# test_epoch()
+test_epoch()
 
 
 
