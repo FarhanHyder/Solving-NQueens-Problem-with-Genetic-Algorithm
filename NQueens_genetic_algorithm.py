@@ -253,10 +253,13 @@ class Chromosome_Collection:
 
     def epoch(self):
 
-        selected_chromosomes  = self.selected_chromosomes()
+        selected_chromosomes  = self.select_fit_chromosomes()
         offspring_needed = POPULATION - len(selected_chromosomes)
-        print(offspring_needed)
         offsprings = []
+
+        print("Selected :",len(selected_chromosomes))
+        print("off needed :",offspring_needed)
+
 
         p1_idx, p2_idx = self.select_parents(len(selected_chromosomes))
 
@@ -282,7 +285,11 @@ def main():
 #     print(collection.select_parents(5))
 
 def test_epoch():
-    pass
+    collection.epoch()
+
+test_epoch()
+
+
 
 def test_cross():
     selected = collection.select_fit_chromosomes()
@@ -291,5 +298,4 @@ def test_cross():
     print("child1 fitness: ",c1[1])
     print("child2 fitness: ",c2[1])
 
-
-test_cross()
+# test_cross()
