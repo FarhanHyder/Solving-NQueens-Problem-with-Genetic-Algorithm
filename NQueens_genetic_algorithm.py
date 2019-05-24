@@ -1,11 +1,7 @@
-'''
-author: Farhan Hyder, Andrew Truett
-CSC 448 - Artificial Intelligence
-Program2 - The n-Queens Problem using Genetic Algorithm
-'''
 import numpy as np
 import random
 import itertools as it  # helps to iterate over a loop in two different ranges
+import statistics as stat
 
 # vars for n_queens
 BOARD_SIZE = 5
@@ -17,7 +13,12 @@ MAX_EPOCH = 100
 START_POPULATION = 100  # keep this number even
 KILL_SIZE = 40  # percentile values
 MUTATION_PROBABILITY = 0.01  # [0.01 - 1.00]
-MATING_PROBABILITY = 0.1
+MATING_PROBABILITY = 0.4
+SELECTION_PROBABILITY = 0.5
+
+MUTATION = "mutation"
+MATING = "mating"
+SELECTION = "selection"
 
 K = 5
 
@@ -112,19 +113,21 @@ class Genetic_Algorithm_Util:
     # post: returns true if it should mutate/mate, false otherwise
     def check_probability(self, whatFor, population):
 
-        if whatFor == "mutation":
+        if whatFor == MUTATION:
             num = MUTATION_PROBABILITY
-        else:
+        elif whatFor == MATING:
             num = MATING_PROBABILITY
+            # we can't cease from existence
+            if population < START_POPULATION:
+                num *= 10  # let's boost the mating season
+            # can't over populate either
+            if population > (START_POPULATION * 100):
+                num /= 10
+                num = max(1, num)
 
-        # we can't cease from existence
-        if population < START_POPULATION:
-            num *= 10    # let's boost the mating season
+        elif whatFor == SELECTION:
+            num = SELECTION_PROBABILITY
 
-        # can't over populate either
-        if population > (START_POPULATION*100):
-            num /= 10
-            num = max(1,num)
 
         random_n = random.randint(1, 100)
         random_n1 = random.randint(1, 100)
@@ -182,6 +185,24 @@ class Chromosome_Collection:
         self.BEST_FIT_CHROMOSOME_INDEX = new_best_fit_chromo_idx
         self.fitness_data = new_fitness_data
 
+    def select_chromosomes_for_next_epoch(self):
+        new_data = []
+
+        population = len(self.data)
+
+        for i in range(population):
+            if self.ga.check_probability(SELECTION, population):
+                item = []
+                chromo = self.data[i][0]
+                fitness = self.data[i][1]
+                item.append(chromo)
+                item.append(fitness)
+
+                new_data.append(item)
+
+        return new_data
+
+
     def select_fit_chromosomes(self):
         new_data = []
         fitness_cap = np.percentile(self.fitness_data, KILL_SIZE)
@@ -219,10 +240,11 @@ class Chromosome_Collection:
         return new_data
 
     def data_info(self, s):
-        print(s)
-        # print(s, end="\t\t\t")
-        # print("best fitness:", self.BEST_FITNESS,end="\t\t")
-        # print("pop: ", len(self.data))
+        # print(s)
+        print(s, end="\t\t\t")
+        print("[bf: ",self.BEST_FITNESS, end="]\t\t")
+        print("[pop: ", len(self.data), end="]\t\t")
+        print("[std:", round(stat.stdev(self.fitness_data), 2), end="]\n")
 
     # post: returns two offspring chromosome items
     def crossover(self, parent1, parent2):
@@ -261,7 +283,7 @@ class Chromosome_Collection:
     def mutate(self, new_data):
         population = len(new_data)
         for i in range(population):
-            if self.ga.check_probability("mutation", population):
+            if self.ga.check_probability(MUTATION, population):
                 row1, row2 = self.get_two_randomized_indices(BOARD_SIZE)
                 # mutate by exchanging queen position
                 temp = new_data[i][0][row1]
@@ -294,7 +316,7 @@ class Chromosome_Collection:
         population = len(selected_parents)
         offsprings = []
         for i in range(population):
-            if (self.ga.check_probability("mating", population)):
+            if (self.ga.check_probability(MATING, population)):
                 p1_idx, p2_idx = self.get_two_randomized_indices(len(selected_parents))
                 p1_idx = i
                 parent1 = selected_parents[p1_idx][0]
@@ -310,7 +332,7 @@ class Chromosome_Collection:
 
     def epoch(self):
         population = len(self.data)
-        selected_chromosomes = self.select_fit_chromosomes()
+        selected_chromosomes = self.select_chromosomes_for_next_epoch()
 
         offspring_needed = population - len(selected_chromosomes)
         offsprings = self.mating_season(selected_chromosomes)
