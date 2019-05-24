@@ -1,14 +1,8 @@
-'''
-author: Farhan Hyder, Andrew Truett
-CSC 448 - Artificial Intelligence
-Program2 - The n-Queens Problem using Backtracking
-'''
-
 import numpy
 import itertools as it  # helps to iterate over a loop in two different ranges
 
 # global vars for the board
-BOARD_SIZE = 10  # board will be a BOARD_SIZE*BOARD_SIZE matrix
+BOARD_SIZE = 25  # board will be a BOARD_SIZE*BOARD_SIZE matrix
 # in order to try different try different chessboards, change BOARD_SIZE
 
 EMPTY = 0
