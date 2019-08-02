@@ -10,3 +10,19 @@ Solution? Well let's try a new `selection method`.
 <br>    
 Other suggestions? Yeah. The current code design is very messy and confusing.
 Better if I start this whole using a different DS. 
+
+
+##### 08/02/2019
+update: the NQueens.py is separated and tested to be working properly.
+<br>
+new changes?: Re-engineering the whole DS. 
+The program should be divided into following classes.
+- NQueens
+- Chromosome 
+    - need to check and store selection(maybe not) and mutation rate
+- Epoch (more like the current Chromosome_Collection class)
+- Main
+    - this is where the magic happens
+    - insures the whole genetic algorithm process
+    - maybe name it Nucleus?
+    
