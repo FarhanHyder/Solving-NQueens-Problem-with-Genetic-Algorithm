@@ -1,8 +1,11 @@
 BOARD_SIZE = 5
 
 
+# violations
+EMPTY_QUEEN_VIOLATION = 5
+
+
 # CONSTANTS
 EMPTY = 0
 QUEEN = 1
-
 

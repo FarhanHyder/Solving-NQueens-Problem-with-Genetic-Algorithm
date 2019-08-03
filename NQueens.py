@@ -55,8 +55,13 @@ class NQueens:
         for i in range(SIZE):
             # find the queen in this row
             col = self.get_queen_col_index(board, i, SIZE)
+
             # check violations for this queen
-            violations += self.check_n_violations(board, i, col,SIZE)
+            if col == -1:
+                # should not be empty
+                violations += EMPTY_QUEEN_VIOLATION
+            else:
+                violations += self.check_n_violations(board, i, col, SIZE)
 
         # round fitness between 0,100
         violations = max(0, min(violations, SIZE))  # clip violations between 0-100
@@ -64,16 +69,20 @@ class NQueens:
         return fitness
 
 
-    # print board in more user friendly way
-    def print_board(self, board, SIZE = BOARD_SIZE):
-        for i in range(SIZE):
-            for j in range(SIZE):
-                item = board[i][j]
-                if item == QUEEN:
-                    print("Q", end=" ")
-                else:
-                    print("-", end=" ")
-            print()
+# prints 2D array board in more user friendly way
+def print_board(board, SIZE = BOARD_SIZE, msg = ""):
+
+    if not (msg == ""):
+        print(msg)
+
+    for i in range(SIZE):
+        for j in range(SIZE):
+            item = board[i][j]
+            if item == QUEEN:
+                print("Q", end=" ")
+            else:
+                print("-", end=" ")
+        print()
 
 
 
