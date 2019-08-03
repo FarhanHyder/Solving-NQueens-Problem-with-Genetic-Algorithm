@@ -1,17 +1,9 @@
 import numpy as np
+from GLOBAL_VARS import *
 import itertools as it  # helps to iterate over a loop in two different ranges
 
-# vars for n_queens
-
-EMPTY = 0
-QUEEN = 1
-
-class N_Qqueens:
+class NQueens:
     # pre: row, col must be in range
-    BOARD_SIZE = 0
-    def __init__(self, size):
-        self.BOARD_SIZE = size
-
     def place_queen(self, board, row, col):
         board[row][col] = QUEEN
 
@@ -20,22 +12,11 @@ class N_Qqueens:
         board[row][col] = EMPTY
 
     # create an empty BOARD_SIZE*BOARD_SIZE matrix
-    def create_empty_board(self):
-        return np.zeros(shape=(self.BOARD_SIZE, self.BOARD_SIZE)).astype(int)
-
-    # print board in more user friendly way
-    def print_board(self, board):
-        for i in range(self.BOARD_SIZE):
-            for j in range(self.BOARD_SIZE):
-                item = board[i][j]
-                if item == QUEEN:
-                    print("Q", end=" ")
-                else:
-                    print("-", end=" ")
-            print()
+    def create_empty_board(self, SIZE = BOARD_SIZE):
+        return np.zeros(shape=(SIZE, SIZE)).astype(int)
 
     # post: returns number of violations committed in the given locations
-    def check_n_violations(self, board, row, col):
+    def check_n_violations(self, board, row, col, SIZE = BOARD_SIZE):
         violations = 0
         # check vertical: up
         for i in it.chain(range(0, row)):
@@ -53,7 +34,7 @@ class N_Qqueens:
         # check diagonal: right-left
         # upper-part
         r_n = [i for i in range(row - 1, -1, -1)]
-        c_n = [i for i in range(col + 1, self.BOARD_SIZE)]
+        c_n = [i for i in range(col + 1, SIZE)]
         for i in range(min(len(r_n), len(c_n))):
             if board[r_n[i]][c_n[i]] == QUEEN:
                 violations += 1
@@ -61,26 +42,39 @@ class N_Qqueens:
         return violations
 
     # returns the col index of the queen in the given row, returns -1 if queen not found
-    def get_queen_col_index(self, board, row):
-        for i in range(self.BOARD_SIZE):
+    def get_queen_col_index(self, board, row, SIZE = BOARD_SIZE):
+        for i in range(SIZE):
             if board[row][i] == QUEEN:
                 return i
         return -1
 
 
 # post: returns a number between 0-100
-    def get_fitness(self, board):
+    def get_fitness(self, board, SIZE = BOARD_SIZE):
         violations = 0
-        for i in range(self.BOARD_SIZE):
+        for i in range(SIZE):
             # find the queen in this row
             col = self.get_queen_col_index(board, i)
             # check violations for this queen
             violations += self.check_n_violations(board, i, col)
 
         # round fitness between 0,100
-        violations = max(0, min(violations, self.BOARD_SIZE))  # clip violations between 0-100
-        fitness = float(((self.BOARD_SIZE - violations) * 100) / self.BOARD_SIZE)
+        violations = max(0, min(violations, SIZE))  # clip violations between 0-100
+        fitness = float(((SIZE - violations) * 100) / SIZE)
         return fitness
+
+
+    # print board in more user friendly way
+    def print_board(self, board, SIZE = BOARD_SIZE):
+        for i in range(SIZE):
+            for j in range(SIZE):
+                item = board[i][j]
+                if item == QUEEN:
+                    print("Q", end=" ")
+                else:
+                    print("-", end=" ")
+            print()
+
 
 
 
@@ -90,7 +84,7 @@ class N_Qqueens:
 Testing here
 import NQueens
 
-nq = NQueens.N_Qqueens(4)
+nq = NQueens.NQueens(4)
 board = nq.create_empty_board()
 
 nq.place_queen(board,0,2)
@@ -104,3 +98,4 @@ print(nq.get_fitness(board))
 
 result: all testing passed for 4*4
 '''
+
