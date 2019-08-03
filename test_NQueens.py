@@ -68,6 +68,7 @@ class TestNQueens(TestCase):
         SIZE = 4
         chromo = nq.create_empty_board(SIZE)
         self.set_perfect_4_by_4_chromosome(chromo)  # this version of ch does not have any violations
-        print(nq.get_fitness(chromo,SIZE=4))
+
+        self.assertEqual(nq.get_fitness(chromo,SIZE=4),100)
 
 
