@@ -25,4 +25,7 @@ The program should be divided into following classes.
     - this is where the magic happens
     - insures the whole genetic algorithm process
     - maybe name it Nucleus?
-    
+ 
+<br>
+Testing: Like whatever I did before for testing, was so childish.
+Need to step my game up in testing. 
