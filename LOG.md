@@ -29,3 +29,6 @@ The program should be divided into following classes.
 <br>
 Testing: Like whatever I did before for testing, was so childish.
 Need to step my game up in testing. 
+
+##### 08/03/2019
+update: NQueens has 100% test coverage. Wohooo!
