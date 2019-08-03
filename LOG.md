@@ -32,3 +32,4 @@ Need to step my game up in testing.
 
 ##### 08/03/2019
 update: NQueens has 100% test coverage. Wohooo!
+new selection method under study: Roulette Wheel Selection
