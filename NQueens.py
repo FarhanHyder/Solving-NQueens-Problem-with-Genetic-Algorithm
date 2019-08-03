@@ -54,9 +54,9 @@ class NQueens:
         violations = 0
         for i in range(SIZE):
             # find the queen in this row
-            col = self.get_queen_col_index(board, i)
+            col = self.get_queen_col_index(board, i, SIZE)
             # check violations for this queen
-            violations += self.check_n_violations(board, i, col)
+            violations += self.check_n_violations(board, i, col,SIZE)
 
         # round fitness between 0,100
         violations = max(0, min(violations, SIZE))  # clip violations between 0-100
