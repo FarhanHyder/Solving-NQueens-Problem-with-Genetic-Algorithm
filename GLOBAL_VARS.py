@@ -1,0 +1,8 @@
+BOARD_SIZE = 5
+
+
+# CONSTANTS
+EMPTY = 0
+QUEEN = 1
+
+
