@@ -2,6 +2,7 @@ import numpy as np
 from GLOBAL_VARS import *
 import itertools as it  # helps to iterate over a loop in two different ranges
 
+
 class NQueens:
     # pre: row, col must be in range
     def place_queen(self, board, row, col):
@@ -12,11 +13,11 @@ class NQueens:
         board[row][col] = EMPTY
 
     # create an empty BOARD_SIZE*BOARD_SIZE matrix
-    def create_empty_board(self, SIZE = BOARD_SIZE):
+    def create_empty_board(self, SIZE=BOARD_SIZE):
         return np.zeros(shape=(SIZE, SIZE)).astype(int)
 
     # post: returns number of violations committed in the given locations
-    def check_n_violations(self, board, row, col, SIZE = BOARD_SIZE):
+    def check_n_violations(self, board, row, col, SIZE=BOARD_SIZE):
         violations = 0
         # check vertical: up
         for i in it.chain(range(0, row)):
@@ -42,15 +43,14 @@ class NQueens:
         return violations
 
     # returns the col index of the queen in the given row, returns -1 if queen not found
-    def get_queen_col_index(self, board, row, SIZE = BOARD_SIZE):
+    def get_queen_col_index(self, board, row, SIZE=BOARD_SIZE):
         for i in range(SIZE):
             if board[row][i] == QUEEN:
                 return i
         return -1
 
-
-# post: returns a number between 0-100
-    def get_fitness(self, board, SIZE = BOARD_SIZE):
+    # post: returns a number between 0-100
+    def get_fitness(self, board, SIZE=BOARD_SIZE):
         violations = 0
         for i in range(SIZE):
             # find the queen in this row
@@ -70,8 +70,7 @@ class NQueens:
 
 
 # prints 2D array board in more user friendly way
-def print_board(board, SIZE = BOARD_SIZE, msg = ""):
-
+def print_board(board, SIZE=BOARD_SIZE, msg=""):
     if not (msg == ""):
         print(msg)
 
@@ -83,28 +82,3 @@ def print_board(board, SIZE = BOARD_SIZE, msg = ""):
             else:
                 print("-", end=" ")
         print()
-
-
-
-
-
-
-'''
-Testing here
-import NQueens
-
-nq = NQueens.NQueens(4)
-board = nq.create_empty_board()
-
-nq.place_queen(board,0,2)
-nq.place_queen(board,1,0)
-nq.place_queen(board,2,3)
-nq.place_queen(board,3,1)
-
-
-nq.print_board(board)
-print(nq.get_fitness(board))
-
-result: all testing passed for 4*4
-'''
-
