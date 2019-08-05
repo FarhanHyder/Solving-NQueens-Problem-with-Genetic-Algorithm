@@ -1,5 +1,6 @@
-BOARD_SIZE = 5
-
+BOARD_SIZE = 20
+MAX_EPOCH = 100
+START_POPULATION = 50
 
 # violations
 EMPTY_QUEEN_VIOLATION = 5
@@ -9,3 +10,7 @@ EMPTY_QUEEN_VIOLATION = 5
 EMPTY = 0
 QUEEN = 1
 
+
+# Roulette Wheel Selection
+RAND_MIN = 0.0
+RAND_MAX = 1.0
