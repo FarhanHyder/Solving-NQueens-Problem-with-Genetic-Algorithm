@@ -34,10 +34,26 @@ Need to step my game up in testing.
 update: NQueens has 100% test coverage. Wohooo!
 new selection method under study: Roulette Wheel Selection
 
+##### 08/04/2019
+update: Roulette Wheel Selection implemented halfway and still under study
+
+
 
 ### Notes for future:
     - fitness functions is being rounded to [0,100]. 
       what if we don't round it. 
       and just keep the most organic result for fitness.
       as, we are using roulette wheel to select crhomosomes after all. 
+      
+    - notes on find_pairs():
+        well, the way current func works:
+            > if population is odd
+                > then make a pair of the last chromosome with itself
+            
+            > even if when then pop is even
+                > there might be some pairs with same chromosome
+                
+                
+        mating rules for this kinda situation:
+            > matie with an alien (randomly created chromosome)
 
