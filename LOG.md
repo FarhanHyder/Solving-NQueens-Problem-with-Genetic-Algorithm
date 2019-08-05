@@ -48,12 +48,10 @@ update: Roulette Wheel Selection implemented halfway and still under study
     - notes on find_pairs():
         well, the way current func works:
             > if population is odd
-                > then make a pair of the last chromosome with itself
-            
-            > even if when then pop is even
-                > there might be some pairs with same chromosome
-                
-                
-        mating rules for this kinda situation:
-            > matie with an alien (randomly created chromosome)
+                > randomly pair some chromosome from the list with the first one
+                > pop-out the first one but don't pop-out the randomly selected one
+        
+            > there might be some pairs with same chromosome
+                mating rules for this kinda situation:
+                    > mate with an alien (randomly created chromosome)
 
