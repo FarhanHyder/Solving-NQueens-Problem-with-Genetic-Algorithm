@@ -33,3 +33,11 @@ Need to step my game up in testing.
 ##### 08/03/2019
 update: NQueens has 100% test coverage. Wohooo!
 new selection method under study: Roulette Wheel Selection
+
+
+### Notes for future:
+    - fitness functions is being rounded to [0,100]. 
+      what if we don't round it. 
+      and just keep the most organic result for fitness.
+      as, we are using roulette wheel to select crhomosomes after all. 
+
