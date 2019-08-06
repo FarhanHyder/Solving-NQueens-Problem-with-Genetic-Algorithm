@@ -36,7 +36,8 @@ new selection method under study: Roulette Wheel Selection
 
 ##### 08/04/2019
 update: Roulette Wheel Selection implemented halfway and still under study
-
+structure change: well, lists are passed by reference. So, I really shouldn't just return arrays if it's not necessary.
+                 Changing few stuffs for crossover, so won't need to return unnecessary looooong lists. 
 
 
 ### Notes for future:
