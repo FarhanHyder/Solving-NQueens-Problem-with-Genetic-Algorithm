@@ -70,6 +70,54 @@ class Epochs:
 
         return parents
 
+    # pre: takes two parent indinces, and the offsprings list
+    # post: adds two childs from the crossover process to the offsprings list
+    def crossover(self, parent1, parent2, offsprings):
+        child1 = Chromosome()
+        child2 = Chromosome()
+
+        K = int(BOARD_SIZE / 2)
+
+        # child1 crossover
+        # > copy from parent 1
+        for i in range(0, K):
+            for j in range(BOARD_SIZE):
+                # child1[i][j] = parent1[i][j]
+                child1.body[i][j] = self.chromosomes[parent1].body[i][j]
+        # > copy from parent 2
+        for i in range(K, BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                # child1[i][j] = parent2[i][j]
+                child1.body[i][j] = self.chromosomes[parent2].body[i][j]
+
+        # child2 crossover
+        # > copy from parent 2
+        for i in range(0, K):
+            for j in range(BOARD_SIZE):
+                # child2[i][j] = parent2[i][j]
+                child2.body[i][j] = self.chromosomes[parent2].body[i][j]
+        # copy from parent 1
+        for i in range(K, BOARD_SIZE):
+            for j in range(BOARD_SIZE):
+                # child2[i][j] = parent1[i][j]
+                child2.body[i][j] = self.chromosomes[parent1].body[i][j]
+
+        # update fitness for recent borns
+        child1.update_fitness()
+        child2.update_fitness()
+
+        # add to the existing list
+        offsprings.append(child1)
+        offsprings.append(child2)
+
+
+    def mating_season(self):
+        offsprings = []
+        parents = self.select_parents()
+        print("parent: ", parents)                  # delete me
+        mating_pairs = self.find_pairs(parents)
+        print("mating pairs: ", mating_pairs)       # delete me
+
 
     def print_epoch_info(self):
         print("Total pop.:", len(self.chromosomes), end="\t\t")
@@ -84,10 +132,23 @@ class Epochs:
         print("mating pairs: ", mating_pairs)
 
 
+        # testing crossover
+        offsprings = []
+        pair = mating_pairs.pop(0)
+        p1 = pair[0]
+        p2 = pair[1]
+        print(p1,p2,sep=",")
+        self.crossover(p1,1,offsprings)
+
+
+        offsprings[0].print_chromosome()
+        offsprings[1].print_chromosome()
+
+
 
 epoch = Epochs()
-# # epoch.test_selection()
 epoch.print_epoch_info()
 
 # arr = [41, 23, 38, 34, 41, 34, 46, 41, 41, 4, 28, 14, 41, 9, 38, 18, 41, 41, 9, 41, 23, 24, 25]
 # print("length ", len(arr))
+
