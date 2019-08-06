@@ -118,6 +118,18 @@ class Epochs:
         mating_pairs = self.find_pairs(parents)
         print("mating pairs: ", mating_pairs)       # delete me
 
+        while len(mating_pairs) > 0:
+            pair = mating_pairs.pop(0)
+            p1 = pair[0];   p2 = pair[1]
+
+            if p1 == p2:
+                # can't make children if they are the same person
+                offsprings.append(self.chromosomes[p1])
+            else:
+                self.crossover(p1,p2,offsprings)
+
+        return offsprings
+
 
     def print_epoch_info(self):
         print("Total pop.:", len(self.chromosomes), end="\t\t")
@@ -126,23 +138,16 @@ class Epochs:
 
         # TODO : delete this after done
         # for testing purposes
-        parents = self.select_parents()
-        print("parent: ", parents)
-        mating_pairs = self.find_pairs(parents)
-        print("mating pairs: ", mating_pairs)
+
 
 
         # testing crossover
-        offsprings = []
-        pair = mating_pairs.pop(0)
-        p1 = pair[0]
-        p2 = pair[1]
-        print(p1,p2,sep=",")
-        self.crossover(p1,1,offsprings)
-
-
-        offsprings[0].print_chromosome()
-        offsprings[1].print_chromosome()
+        offs = self.mating_season()
+        sum = 0
+        for i in range(len(offs)):
+            # print(offs[i].fitness)
+            sum += offs[i].fitness
+        print("offs avg. fitness: ",sum/len(offs))
 
 
 
